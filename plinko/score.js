@@ -1,5 +1,4 @@
 const outputs = [];
-const k = 3;
 
 function splitDataset(data, length)
 {
@@ -10,7 +9,7 @@ function splitDataset(data, length)
 	return [testData, trainingData];
 }
 
-function KNN(data, point)
+function KNN(data, point, k)
 {
   return _.chain(data).map((output) => [Math.abs(output[0] - point), output[3]])
 	  	 .sortBy((output) => output[0]).slice(0, k)
@@ -23,11 +22,17 @@ function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 }
 
 function runAnalysis() {
-  let [testData, trainingData] = splitDataset(outputs, 10);
-  let accuracy = _.chain(testData).filter(testPoint => {
-	return (KNN(trainingData, testPoint[0]) === testPoint[3]);
-  }).size().divide(10).value();
+  let split = Math.round(outputs.length / 2);
+  let [testData, trainingData] = splitDataset(outputs, split)
   
-  console.log("Accuracy: ", accuracy * 100);
+  _.range(1, 15).forEach(k => {
+	let accuracy = _.chain(testData).filter((testPoint) => {
+		return (KNN(trainingData, testPoint[0], k) === testPoint[3]);
+	}).size().divide(split).value();
+	
+	console.log("K# ", k, " Accuracy: ", accuracy * 100);
+  });
+  
+  
 }
 
