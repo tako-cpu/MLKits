@@ -30,7 +30,7 @@ function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 
 function runAnalysis() {
   let split = Math.round(outputs.length / 2);
-  let [testData, trainingData] = splitDataset(outputs, split)
+  let [testData, trainingData] = splitDataset(minMax(outputs, 3), split)
   
   _.range(1, 15).forEach(k => {
 	let accuracy = _.chain(testData).filter((testPoint) => {
@@ -43,3 +43,21 @@ function runAnalysis() {
   
 }
 
+function minMax(data, featureCount)
+{
+	const clone = _.cloneDeep(data);
+	
+	for(let feature = 0; feature < featureCount; feature++)
+	{
+		let column = clone.map(row => row[feature]);
+		const min = _.min(column);
+		const max = _.max(column);
+		
+		for(let data = 0; data < clone.length; data++)
+		{
+			clone[data][feature] = ((clone[data][feature] - min) / (max - min));
+		}
+	}
+	
+	return clone;
+}
