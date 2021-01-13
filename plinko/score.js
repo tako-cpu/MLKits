@@ -9,12 +9,19 @@ function splitDataset(data, length)
 	return [testData, trainingData];
 }
 
+function getDistance(a, b)
+{
+	return _.chain(a).zip(b).map((p1, p2) => (p1 - p2) ** 2)
+			.sum().value() ** 0.5;
+}
+
 function KNN(data, point, k)
 {
-  return _.chain(data).map((output) => [Math.abs(output[0] - point), output[3]])
-	  	 .sortBy((output) => output[0]).slice(0, k)
-		 .countBy((output) => output[1]).toPairs().sortBy((pair) => pair[1])
-		 .last().first().parseInt().value();		 
+  return _.chain(data).map((output) => {
+	  return [getDistance(_.initial(output), point), _.last(output)];
+  }).sortBy((output) => output[0]).slice(0, k)
+	.countBy((output) => output[1]).toPairs().sortBy((pair) => pair[1])
+	.last().first().parseInt().value();		 
 }
 
 function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
@@ -27,7 +34,7 @@ function runAnalysis() {
   
   _.range(1, 15).forEach(k => {
 	let accuracy = _.chain(testData).filter((testPoint) => {
-		return (KNN(trainingData, testPoint[0], k) === testPoint[3]);
+		return (KNN(trainingData, _.initial(testPoint), k) === testPoint[3]);
 	}).size().divide(split).value();
 	
 	console.log("K# ", k, " Accuracy: ", accuracy * 100);
