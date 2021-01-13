@@ -1,16 +1,21 @@
 const outputs = [];
-const prediction = 300;
 const k = 3;
-const testData = [];
-const trainingData = [];
-const testcount = 0;
 
-
-function splitDataset()
+function splitDataset(data, length)
 {
-	let shuffled = _.shuffle(outputs);
-	testData = _.slice(shuffled, 0, testcount);
-	trainingData = _.slice(shuffled, testcount);
+	let shuffled = _.shuffle(data);
+	let testData = _.slice(shuffled, 0, length);
+	let trainingData = _.slice(shuffled, length);
+	
+	return [testData, trainingData];
+}
+
+function KNN(data, point)
+{
+  return _.chain(data).map((output) => [Math.abs(output[0] - point), output[3]])
+	  	 .sortBy((output) => output[0]).slice(0, k)
+		 .countBy((output) => output[1]).toPairs().sortBy((pair) => pair[1])
+		 .last().first().parseInt().value();		 
 }
 
 function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
@@ -18,11 +23,18 @@ function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 }
 
 function runAnalysis() {
-  const parsed = _.chain(outputs).map((output) => [Math.abs(output[0] - prediction), output[3]])
-				 .sortBy((output) => output[0]).slice(0, k)
-				 .countBy((output) => output[1]).toPairs().sortBy((pair) => pair[1])
-				 .last().first().parseInt().value();
-				 
-  console.log(parsed);
+  let [testData, trainingData] = splitDataset(outputs, 10);
+  let correct = 0;
+  
+  for (let i = 0; i < testData.length; i++)
+  {
+	  const bucket = KNN(trainingData, testData[i][0]);
+	  if(bucket === testData[i][3])
+	  {
+		  correct++;
+	  }	  
+  }
+  
+  console.log("Accuracy: ", correct / testData.length);
 }
 
