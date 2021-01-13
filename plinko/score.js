@@ -24,17 +24,10 @@ function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 
 function runAnalysis() {
   let [testData, trainingData] = splitDataset(outputs, 10);
-  let correct = 0;
+  let accuracy = _.chain(testData).filter(testPoint => {
+	return (KNN(trainingData, testPoint[0]) === testPoint[3]);
+  }).size().divide(10).value();
   
-  for (let i = 0; i < testData.length; i++)
-  {
-	  const bucket = KNN(trainingData, testData[i][0]);
-	  if(bucket === testData[i][3])
-	  {
-		  correct++;
-	  }	  
-  }
-  
-  console.log("Accuracy: ", correct / testData.length);
+  console.log("Accuracy: ", accuracy * 100);
 }
 
