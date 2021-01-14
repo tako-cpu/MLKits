@@ -30,14 +30,17 @@ function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 
 function runAnalysis() {
   let split = Math.round(outputs.length / 2);
-  let [testData, trainingData] = splitDataset(minMax(outputs, 3), split)
+  //let [testData, trainingData] = splitDataset(minMax(outputs, 3), split)
+  const k = 10;
   
-  _.range(1, 15).forEach(k => {
+  _.range(0, 3).forEach(feature => {
+	let datum = _.map(outputs, row => [row[feature], _.last(row)]);
+	let [testData, trainingData] = splitDataset(minMax(datum, 1), split)
 	let accuracy = _.chain(testData).filter((testPoint) => {
-		return (KNN(trainingData, _.initial(testPoint), k) === testPoint[3]);
+		return (KNN(trainingData, _.initial(testPoint), k) === _.last(testPoint));
 	}).size().divide(split).value();
 	
-	console.log("K# ", k, " Accuracy: ", accuracy * 100);
+	console.log("Feature# ", feature, " Accuracy: ", accuracy * 100);
   });
   
   
