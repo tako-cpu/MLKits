@@ -375,7 +375,8 @@ class LinearRegression
 		(
 			{
 				learningRate: 0.1,
-				iterations: 10
+				iterations: 10,
+				decisionBoundary: 0.5
 			},
 			options
 		);
@@ -494,7 +495,8 @@ class LinearRegression
 	
 	predict(observations)
 	{
-		return this.processFeatures(observations).matMul(this.weights).sigmoid();
+		//cast() to tell treat boolean as numbers in result of greater()
+		return this.processFeatures(observations).matMul(this.weights).sigmoid().greater(this.options.decisionBoundary).cast('float32');
 	}
 }
 
