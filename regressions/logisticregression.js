@@ -368,6 +368,7 @@ class LinearRegression
 		this.labels = tf.tensor(labels);
 		this.mseHistory = [];
 		this.bHistory = [];
+		this.costHistory = [];
 		
 		//this.features = tf.ones([this.features.shape[0], 1]).concat(this.features, 1);
 		
@@ -413,7 +414,7 @@ class LinearRegression
 			
 			this.bHistory.push(this.weights.get(0, 0));
 			console.log(this.options.iterations);
-			this.recordMSE();
+			this.recordCost();
 			this.updateLearningRate();
 		}
 	}
@@ -478,12 +479,24 @@ class LinearRegression
 		this.mseHistory.unshift(mse);
 	}
 	
+	recordCost()
+	{
+		const guesses = this.features.matMul(this.weights).sigmoid();
+		const term1 = this.labels.transpose().matMul(guesses.log());
+		const term2 = this.labels.mul(-1).add(1).transpose().matMul(
+			guesses.mul(-1).add(1).log()
+		);
+		
+		const cost = term1.add(term2).div(this.features.shape[0]).mul(-1).get(0, 0);
+		this.costHistory.unshift(cost);
+	}
+	
 	updateLearningRate()
 	{
-		if(this.mseHistory.length < 2)
+		if(this.costHistory.length < 2)
 			return;
 			
-		if(this.mseHistory[0] > this.mseHistory[1])
+		if(this.costHistory[0] > this.costHistory[1])
 		{
 			this.options.learningRate /= 2;
 		}
@@ -519,10 +532,9 @@ console.log(Algorithm.weights.get(1, 0), Algorithm.weights.get(0, 0));
 	// yLabel: 'MSE'
 // });
 plot({
-	x: Algorithm.bHistory,
-	y: Algorithm.mseHistory.reverse(),
-	xLabel: 'B',
-	yLabel: 'MSE'
+	x: Algorithm.costHistory.reverse(),
+	xLabel: 'Iterations',
+	yLabel: 'Cost'
 });
 
 Algorithm.predict(
