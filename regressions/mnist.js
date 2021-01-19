@@ -5,18 +5,38 @@ const _ = require('lodash');
 const mnist = require('mnist-data');
 const t = require('./imagerecog');
 
-const mnistData = mnist.training(0, 1);
+// const mnistData = mnist.training(0, 1);
 
-//We want to make it 1 big row
-const features = mnistData.images.values.map((image) => {
-	return _.flatMap(image);
-});
-const encodedLabels = mnistData.labels.values.map((image) => {
-	const row = new Array(10).fill(0); //[0, 0, ,0, ..., 0]
-	row[image] = 1;
+// //We want to make it 1 big row
+// const features = mnistData.images.values.map((image) => {
+	// return _.flatMap(image);
+// });
+// const encodedLabels = mnistData.labels.values.map((image) => {
+	// const row = new Array(10).fill(0); //[0, 0, ,0, ..., 0]
+	// row[image] = 1;
 	
-	return row;
-});
+	// return row;
+// });
+
+function loadData()
+{
+	const mnistData = mnist.training(0, 1);
+
+	//We want to make it 1 big row
+	const features = mnistData.images.values.map((image) => {
+		return _.flatMap(image);
+	});
+	const encodedLabels = mnistData.labels.values.map((image) => {
+		const row = new Array(10).fill(0); //[0, 0, ,0, ..., 0]
+		row[image] = 1;
+		
+		return row;
+	});
+	
+	return { features, labels: encodedLabels };
+}
+
+const { features, encodedLabels } = loadData();
 
 const regression = new t.LogisticRegression(features, encodedLabels, {
 	learningRate: 1,
