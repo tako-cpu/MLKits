@@ -481,14 +481,28 @@ class LinearRegression
 	
 	recordCost()
 	{
-		const guesses = this.features.matMul(this.weights).softmax();
-		const term1 = this.labels.transpose().matMul(guesses.log());
-		const term2 = this.labels.mul(-1).add(1).transpose().matMul(
-			guesses.mul(-1).add(1).log()
-		);
+		// const guesses = this.features.matMul(this.weights).softmax();
+		// const term1 = this.labels.transpose().matMul(guesses.log());
+		// const term2 = this.labels.mul(-1).add(1).transpose().matMul(
+			// guesses.mul(-1).add(1).log()
+		// );
 		
-		const cost = term1.add(term2).div(this.features.shape[0]).mul(-1).get(0, 0);
-		this.costHistory.unshift(cost);
+		// const cost = term1.add(term2).div(this.features.shape[0]).mul(-1).get(0, 0);
+		// this.costHistory.unshift(cost);
+		
+		//For image recog performance
+		const cost = tf.tidy(() => {
+			const guesses = this.features.matMul(this.weights).softmax();
+			const term1 = this.labels.transpose().matMul(guesses.add(1e-7).log());
+			const term2 = this.labels.mul(-1).add(1).transpose().matMul(
+				guesses.mul(-1).add(1).add(1e-7).log() //avoid log(0) => 1e-7
+			);
+			
+			return term1.add(term2).div(this.features.shape[0]).mul(-1).get(0, 0);
+		});
+		
+		this.costHistory.unshift(cost);		
+		return cost;
 	}
 	
 	updateLearningRate()
