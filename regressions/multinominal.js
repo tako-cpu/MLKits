@@ -390,7 +390,7 @@ class LinearRegression
 	
 	runGradientDescent(features, labels)
 	{
-		let currentGuess = features.matMul(this.weights).sigmoid();
+		let currentGuess = features.matMul(this.weights).softmax();
 		let differences = currentGuess.sub(labels);
 		
 		let slopes = features.transpose.matMul(differences)
@@ -481,7 +481,7 @@ class LinearRegression
 	
 	recordCost()
 	{
-		const guesses = this.features.matMul(this.weights).sigmoid();
+		const guesses = this.features.matMul(this.weights).softmax();
 		const term1 = this.labels.transpose().matMul(guesses.log());
 		const term2 = this.labels.mul(-1).add(1).transpose().matMul(
 			guesses.mul(-1).add(1).log()
@@ -509,7 +509,7 @@ class LinearRegression
 	predict(observations)
 	{
 		//cast() to tell treat boolean as numbers in result of greater()
-		return this.processFeatures(observations).matMul(this.weights).sigmoid().greater(this.options.decisionBoundary).cast('float32');
+		return this.processFeatures(observations).matMul(this.weights).softmax().greater(this.options.decisionBoundary).cast('float32');
 	}
 }
 
