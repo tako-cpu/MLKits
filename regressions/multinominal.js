@@ -435,9 +435,9 @@ class LinearRegression
 		
 		// return 1 - (res / tot);
 		const predictions = this.predict(testFeatures).round();
-		testLabels = tf.tensor(testLabels);
+		testLabels = tf.tensor(testLabels).argMax(1);
 		
-		const incorrect = predictions.sub(testLabels).abs().sum().get();
+		const incorrect = predictions.notEqual(testLabels).sum().get();
 		
 		const correct = (predictions.shape[0] - incorrect) / predictions.shape[0];
 		return correct;
@@ -509,7 +509,7 @@ class LinearRegression
 	predict(observations)
 	{
 		//cast() to tell treat boolean as numbers in result of greater()
-		return this.processFeatures(observations).matMul(this.weights).softmax().greater(this.options.decisionBoundary).cast('float32');
+		return this.processFeatures(observations).matMul(this.weights).softmax().argMax(1);
 	}
 }
 
