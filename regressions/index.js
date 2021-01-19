@@ -8,15 +8,22 @@ let { features, labels, testFeatures, testLabels } = loadCSV('./cars.csv', {
   shuffle: true,
   splitTest: 50,
   dataColumns: ['horsepower', 'displacement', 'weight'],
-  labelColumns: ['passedemissions'],
+  labelColumns: ['mpg'],
   converters: {
-	passedemissions: (value) => {
-		return value === 'TRUE'? 1 : 0;
+	mpg: (value) => {
+		const mpg = parseFloat(value);
+		
+		if(mpg < 15)
+			return [1, 0, 0];
+		else if(mpg < 30)
+			return [0, 1, 0];
+		else
+			return [0, 0, 1];
 	}
   }
 });
 
-const regression = new LinearRegression(features, labels, {
+const regression = new LinearRegression(features, _.flatMap(labels), {
   learningRate: 0.1,
   iterations: 3,
   batchSize: 10
@@ -33,4 +40,6 @@ plot({
 
 console.log('R2 is', r2);
 
-regression.predict([[120, 2, 380]]).print();
+regression.predict([
+	[215, 440, 2.16]
+]).print();
